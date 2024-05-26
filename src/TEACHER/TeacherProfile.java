@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import student.attendance.system.LoginPage;
 
@@ -633,15 +634,19 @@ public class TeacherProfile extends javax.swing.JFrame {
 
     //logout button
     private void jLogoutButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLogoutButtonMouseClicked
-        Session session = Session.getInstance();
-        int id = session.getId();
-        LogsHistory logHistory = new LogsHistory();
-        logHistory.insertTeacherLog(id, "Teacher Logout");
-        LoginPage loginFrame = new LoginPage();
-        loginFrame.setVisible(true);
-        loginFrame.pack();
-        loginFrame.setLocationRelativeTo(null);
-        this.dispose();
+        int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to logout?", "", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION){
+            //history logs
+            Session session = Session.getInstance();
+            int id = session.getId();
+            LogsHistory logHistory = new LogsHistory();
+            logHistory.insertTeacherLog(id, "Teacher Logout");
+            LoginPage loginFrame = new LoginPage();
+            loginFrame.setVisible(true);
+            loginFrame.pack();
+            loginFrame.setLocationRelativeTo(null);
+            this.dispose();
+        }
     }//GEN-LAST:event_jLogoutButtonMouseClicked
 
     private void jLogoutButtonMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLogoutButtonMouseEntered

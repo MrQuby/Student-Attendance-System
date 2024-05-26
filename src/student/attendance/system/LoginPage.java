@@ -53,6 +53,24 @@ public class LoginPage extends javax.swing.JFrame {
         }
     }
     
+    public static String loginAccountArchive(int id, String password){
+        myConnection connector = new myConnection();
+        try{
+            String query = "SELECT * FROM teacher  WHERE teacher_id = '" + id + "' AND teacher_password = '" + password + "'";
+            ResultSet resultSet = connector.getData(query);
+            if(resultSet.next()) {
+                Session session = Session.getInstance();
+                session.getData(id);
+                return resultSet.getString("teacher_archive");
+            }else{
+                return null;
+            }
+        }catch (SQLException ex) {
+            System.out.println("Invalid Connection" + ex.getMessage());
+            return null;
+        }
+    }
+    
     //check if admin id and pass is correct
     public static boolean loginAccountAdmin(int id, String password){
         myConnection connector = new myConnection();
@@ -347,7 +365,7 @@ public class LoginPage extends javax.swing.JFrame {
         String password = jPassword.getText();
         String hashPassword = hashpass.passwordHash(password);
         String status = loginAccountStatus(id,hashPassword);
-        
+        String archive = loginAccountArchive(id,hashPassword);
         if(loginAccountAdmin(id, hashPassword)){
             showSuccessDialog("Login Successfully");
             Session session = Session.getInstance();
@@ -363,7 +381,7 @@ public class LoginPage extends javax.swing.JFrame {
             this.dispose(); 
         }else{
             if(status != null){
-                if(status.equals("ACTIVE")){
+                if(status.equals("ACTIVE") && archive.equals("NO")){
                     showSuccessDialog("Login Successfully");
                     //history logs
                     LogsHistory logHistory = new LogsHistory();
@@ -374,8 +392,11 @@ public class LoginPage extends javax.swing.JFrame {
                     teacherframe.pack();
                     teacherframe.setLocationRelativeTo(null);
                     this.dispose();
-                }else{
+                }else if(status.equals("INACTIVE") && archive.equals("NO")){
                     jError.setText("User is InActive");
+                    return;
+                }else{
+                    jError.setText("Invalid user ID or password");
                     return;
                 }
             }else{

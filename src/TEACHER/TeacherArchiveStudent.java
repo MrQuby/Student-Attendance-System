@@ -677,15 +677,19 @@ public class TeacherArchiveStudent extends javax.swing.JFrame {
     }//GEN-LAST:event_jArchiveStudentsMouseExited
 
     private void jLogoutButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLogoutButtonMouseClicked
-        Session session = Session.getInstance();
-        int id = session.getId();
-        LogsHistory logHistory = new LogsHistory();
-        logHistory.insertTeacherLog(id, "Teacher Logout");
-        LoginPage loginFrame = new LoginPage();
-        loginFrame.setVisible(true);
-        loginFrame.pack();
-        loginFrame.setLocationRelativeTo(null);
-        this.dispose();
+        int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to logout?", "", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION){
+            //hiatory logs
+            Session session = Session.getInstance();
+            int id = session.getId();
+            LogsHistory logHistory = new LogsHistory();
+            logHistory.insertTeacherLog(id, "Teacher Logout");
+            LoginPage loginFrame = new LoginPage();
+            loginFrame.setVisible(true);
+            loginFrame.pack();
+            loginFrame.setLocationRelativeTo(null);
+            this.dispose();
+        }
     }//GEN-LAST:event_jLogoutButtonMouseClicked
 
     private void jLogoutButtonMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLogoutButtonMouseEntered

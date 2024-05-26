@@ -174,33 +174,7 @@ public class TeacherManageStudent extends javax.swing.JFrame {
         }
     }
     
-    //deleted the selected ID
-    private void deleteSelectedRow() {
-        int selectedRow = jstudent_Table.getSelectedRow();
-        if (selectedRow >= 0) {
-            int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this record?", "", JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) {
-                int studentID = (int)jstudent_Table.getValueAt(selectedRow, 0); // Assuming student ID is in the first column
-                String query = "DELETE FROM student WHERE student_id = '" + studentID + "'";
-                myConnection dbc = new myConnection();
-                if (dbc.insertData(query)) {
-                    ((DefaultTableModel)jstudent_Table.getModel()).removeRow(selectedRow);
-                    showSuccessDialog("Student ID " + studentID + " Record deleted successfully.");
-                    //history logs
-                    Session session = Session.getInstance();
-                    int teacherID = session.getId();
-                    LogsHistory logHistory = new LogsHistory();
-                    logHistory.insertTeacherLog(teacherID, "Teacher deleted student with ID number " + studentID);
-                    
-                    displayDataTable();
-                } else {
-                    JOptionPane.showMessageDialog(null, "Failed to delete record.", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        } else {
-            JOptionPane.showMessageDialog(null, "Please select a row to delete.", "No Row Selected", JOptionPane.WARNING_MESSAGE);
-        }
-    }
+    
     
     //archieve the selected ID
     private void archiveSelectedRow() {
@@ -318,7 +292,6 @@ public class TeacherManageStudent extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         jAddButton = new javax.swing.JButton();
         jUpdateButton = new javax.swing.JButton();
-        jButtonDelete = new javax.swing.JButton();
         jButtonRefreshData = new javax.swing.JButton();
         jSearchField = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -357,12 +330,12 @@ public class TeacherManageStudent extends javax.swing.JFrame {
         jProfileSettings.setBackground(new java.awt.Color(40, 110, 210));
         jProfileSettings.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jProfileSettings.addAncestorListener(new javax.swing.event.AncestorListener() {
-            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
-            }
             public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
                 jProfileSettingsAncestorAdded(evt);
             }
             public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
+            }
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
             }
         });
         jProfileSettings.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -609,23 +582,6 @@ public class TeacherManageStudent extends javax.swing.JFrame {
         jPanel1.add(jUpdateButton);
         jUpdateButton.setBounds(330, 260, 85, 24);
 
-        jButtonDelete.setBackground(new java.awt.Color(51, 153, 255));
-        jButtonDelete.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
-        jButtonDelete.setForeground(new java.awt.Color(255, 255, 255));
-        jButtonDelete.setText("DELETE");
-        jButtonDelete.setContentAreaFilled(false);
-        jButtonDelete.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonDelete.setFocusPainted(false);
-        jButtonDelete.setOpaque(true);
-        jButtonDelete.setPreferredSize(new java.awt.Dimension(85, 24));
-        jButtonDelete.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonDeleteActionPerformed(evt);
-            }
-        });
-        jPanel1.add(jButtonDelete);
-        jButtonDelete.setBounds(530, 260, 85, 24);
-
         jButtonRefreshData.setBackground(new java.awt.Color(51, 153, 255));
         jButtonRefreshData.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
         jButtonRefreshData.setForeground(new java.awt.Color(255, 255, 255));
@@ -641,7 +597,7 @@ public class TeacherManageStudent extends javax.swing.JFrame {
             }
         });
         jPanel1.add(jButtonRefreshData);
-        jButtonRefreshData.setBounds(630, 260, 85, 24);
+        jButtonRefreshData.setBounds(530, 260, 85, 24);
 
         jSearchField.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
         jSearchField.setText("search student ID");
@@ -820,11 +776,6 @@ public class TeacherManageStudent extends javax.swing.JFrame {
         updateData();
     }//GEN-LAST:event_jUpdateButtonActionPerformed
 
-    //delete button
-    private void jButtonDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteActionPerformed
-        deleteSelectedRow();
-    }//GEN-LAST:event_jButtonDeleteActionPerformed
-
     //refresh button
     private void jButtonRefreshDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRefreshDataActionPerformed
         jError.setText("");
@@ -868,17 +819,20 @@ public class TeacherManageStudent extends javax.swing.JFrame {
     }//GEN-LAST:event_jArchiveActionPerformed
 
     private void jLogoutButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLogoutButton1MouseClicked
-        //history logs
-        Session session = Session.getInstance();
-        int teacherID = session.getId();
-        LogsHistory logHistory = new LogsHistory();
-        logHistory.insertTeacherLog(teacherID, "Teacher Logout");
-        
-        LoginPage loginFrame = new LoginPage();
-        loginFrame.setVisible(true);
-        loginFrame.pack();
-        loginFrame.setLocationRelativeTo(null);
-        this.dispose();
+        int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to logout?", "", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION){
+            //history logs
+            Session session = Session.getInstance();
+            int teacherID = session.getId();
+            LogsHistory logHistory = new LogsHistory();
+            logHistory.insertTeacherLog(teacherID, "Teacher Logout");
+
+            LoginPage loginFrame = new LoginPage();
+            loginFrame.setVisible(true);
+            loginFrame.pack();
+            loginFrame.setLocationRelativeTo(null);
+            this.dispose();
+        }
     }//GEN-LAST:event_jLogoutButton1MouseClicked
 
     private void jLogoutButton1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLogoutButton1MouseEntered
@@ -916,7 +870,6 @@ public class TeacherManageStudent extends javax.swing.JFrame {
     private javax.swing.JButton jArchive;
     private javax.swing.JPanel jArchiveStudents;
     private javax.swing.JPanel jAttendance;
-    private javax.swing.JButton jButtonDelete;
     private javax.swing.JButton jButtonRefreshData;
     private javax.swing.JPanel jDashboard;
     private javax.swing.JLabel jError;

@@ -270,10 +270,9 @@ public class TeacherAttendance extends javax.swing.JFrame {
             if (selectedDate == null && studentId.isEmpty()) {
                 try {
                     myConnection dbc = new myConnection();
-                    String query = "SELECT attendance.student_id, student.student_fullname, attendance_table.time_in, attendance_table.time_out, attendance_table.date "
+                    String query = "SELECT attendance_table.student_id, student.student_fullname, attendance_table.time_in, attendance_table.time_out, attendance_table.date "
                         + "FROM student "
-                        + "INNER JOIN attendance_table ON student.student_id = attendance_table.student_id "
-                        + "WHERE";
+                        + "INNER JOIN attendance_table ON student.student_id = attendance_table.student_id";
 
                     ResultSet rs = dbc.getData(query);
                     jstudent_attendance.setModel(DbUtils.resultSetToTableModel(rs));
@@ -282,7 +281,7 @@ public class TeacherAttendance extends javax.swing.JFrame {
 
                     rs.close();
                 } catch (SQLException ex) {
-                    System.out.println("Errors: " + ex.getMessage());
+                    System.out.println("Errors1: " + ex.getMessage());
                 }
             }  
         }
@@ -744,14 +743,18 @@ public class TeacherAttendance extends javax.swing.JFrame {
 
     //logout button
     private void jLogoutButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLogoutButtonMouseClicked
-        Session session = Session.getInstance();
-        int id = session.getId();
-        LogsHistory logHistory = new LogsHistory();
-        logHistory.insertTeacherLog(id, "Teacher Logout");LoginPage loginFrame = new LoginPage();
-        loginFrame.setVisible(true);
-        loginFrame.pack();
-        loginFrame.setLocationRelativeTo(null);
-        this.dispose();
+        int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to logout?", "", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION){
+            //history logs
+            Session session = Session.getInstance();
+            int id = session.getId();
+            LogsHistory logHistory = new LogsHistory();
+            logHistory.insertTeacherLog(id, "Teacher Logout");LoginPage loginFrame = new LoginPage();
+            loginFrame.setVisible(true);
+            loginFrame.pack();
+            loginFrame.setLocationRelativeTo(null);
+            this.dispose();
+        }
     }//GEN-LAST:event_jLogoutButtonMouseClicked
 
     private void jLogoutButtonMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLogoutButtonMouseEntered

@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import student.attendance.system.LoginPage;
 
@@ -140,6 +141,8 @@ public class AdminDashBoard extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         jHistoryLogs = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
+        jArchiveTeacher = new javax.swing.JPanel();
+        jLabel18 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         jAdminName = new javax.swing.JLabel();
@@ -270,7 +273,7 @@ public class AdminDashBoard extends javax.swing.JFrame {
         jLabel8.setBounds(30, 0, 130, 50);
 
         jPanel2.add(jLogoutButton);
-        jLogoutButton.setBounds(0, 340, 220, 50);
+        jLogoutButton.setBounds(0, 390, 220, 50);
 
         jHistoryLogs.setBackground(new java.awt.Color(40, 110, 210));
         jHistoryLogs.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -295,7 +298,35 @@ public class AdminDashBoard extends javax.swing.JFrame {
         jLabel12.setBounds(30, 0, 170, 50);
 
         jPanel2.add(jHistoryLogs);
-        jHistoryLogs.setBounds(0, 290, 220, 50);
+        jHistoryLogs.setBounds(0, 340, 220, 50);
+
+        jArchiveTeacher.setBackground(new java.awt.Color(40, 110, 210));
+        jArchiveTeacher.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jArchiveTeacher.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jArchiveTeacherMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jArchiveTeacherMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                jArchiveTeacherMouseExited(evt);
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jArchiveTeacherMousePressed(evt);
+            }
+        });
+        jArchiveTeacher.setLayout(null);
+
+        jLabel18.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel18.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel18.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/ARCHIEVE.png"))); // NOI18N
+        jLabel18.setText("  Archive Teacher");
+        jArchiveTeacher.add(jLabel18);
+        jLabel18.setBounds(30, 0, 170, 50);
+
+        jPanel2.add(jArchiveTeacher);
+        jArchiveTeacher.setBounds(0, 290, 220, 50);
 
         jPanel1.add(jPanel2);
         jPanel2.setBounds(0, 0, 220, 700);
@@ -461,15 +492,18 @@ public class AdminDashBoard extends javax.swing.JFrame {
 
     //logout button
     private void jLogoutButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLogoutButtonMouseClicked
-        //history logs
-        LogsHistory logHistory = new LogsHistory();
-        logHistory.insertAdminLog(adminID, "Admin Logout");
-        
-        LoginPage loginFrame = new LoginPage();
-        loginFrame.setVisible(true);
-        loginFrame.pack();
-        loginFrame.setLocationRelativeTo(null);
-        this.dispose();
+        int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to logout?", "", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION){
+            //history logs
+            LogsHistory logHistory = new LogsHistory();
+            logHistory.insertAdminLog(adminID, "Admin Logout");
+
+            LoginPage loginFrame = new LoginPage();
+            loginFrame.setVisible(true);
+            loginFrame.pack();
+            loginFrame.setLocationRelativeTo(null);
+            this.dispose();
+        }
     }//GEN-LAST:event_jLogoutButtonMouseClicked
 
     private void jLogoutButtonMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLogoutButtonMouseEntered
@@ -496,6 +530,26 @@ public class AdminDashBoard extends javax.swing.JFrame {
         resetColor(jHistoryLogs);
     }//GEN-LAST:event_jHistoryLogsMouseExited
 
+    private void jArchiveTeacherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jArchiveTeacherMouseClicked
+        AdminTeacherArchive archiveFrame = new AdminTeacherArchive();
+        archiveFrame.setVisible(true);
+        archiveFrame.pack();
+        archiveFrame.setLocationRelativeTo(null);
+        this.dispose();
+    }//GEN-LAST:event_jArchiveTeacherMouseClicked
+
+    private void jArchiveTeacherMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jArchiveTeacherMouseEntered
+        setColor(jArchiveTeacher);
+    }//GEN-LAST:event_jArchiveTeacherMouseEntered
+
+    private void jArchiveTeacherMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jArchiveTeacherMouseExited
+        resetColor(jArchiveTeacher);
+    }//GEN-LAST:event_jArchiveTeacherMouseExited
+
+    private void jArchiveTeacherMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jArchiveTeacherMousePressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jArchiveTeacherMousePressed
+
     
     
     public static void main(String args[]) {
@@ -515,6 +569,7 @@ public class AdminDashBoard extends javax.swing.JFrame {
     private javax.swing.JLabel SCCLogo;
     private javax.swing.JLabel datetime;
     public javax.swing.JLabel jAdminName;
+    private javax.swing.JPanel jArchiveTeacher;
     private javax.swing.JPanel jClasses;
     private javax.swing.JPanel jDashboard;
     private javax.swing.JPanel jHistoryLogs;
@@ -527,6 +582,7 @@ public class AdminDashBoard extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel6;

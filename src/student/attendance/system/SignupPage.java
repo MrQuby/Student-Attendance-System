@@ -187,7 +187,7 @@ public class SignupPage extends javax.swing.JFrame {
             birthdate = dateformat.format(jBirthdate.getDate());
             //insert data to database
             myConnection connection = new myConnection();
-            String query = "INSERT INTO `teacher`(`teacher_id`, `teacher_name`, `teacher_contact_number`, `teacher_password`, `teacher_birthdate`, `teacher_gender`, `teacher_address`, `teacher_status`) VALUES ("
+            String query = "INSERT INTO `teacher`(`teacher_id`, `teacher_name`, `teacher_contact_number`, `teacher_password`, `teacher_birthdate`, `teacher_gender`, `teacher_address`, `teacher_status`, teacher_archive) VALUES ("
                     + "'" + Integer.parseInt(idnumbertext) + "',"
                     + "'"+ name +"',"
                     + "'"+ contactnumber +"',"
@@ -195,7 +195,8 @@ public class SignupPage extends javax.swing.JFrame {
                     + "'"+ birthdate +"',"
                     + "'"+ gender +"',"
                     + "'"+ address +"',"
-                    + "'PENDING')";
+                    + "'PENDING'"
+                    + "'NO')";
             if(connection.insertData(query)) {
                 showSuccessDialog("Register Successfully");
                 //history logs

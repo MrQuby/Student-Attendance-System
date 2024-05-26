@@ -30,7 +30,6 @@ public class myConnection {
         try{
             PreparedStatement pst = connect.prepareStatement(sql);
             pst.executeUpdate();
-            System.out.println("Inserted Successfully!");
             pst.close();
            return true;
         }catch(SQLException ex){
@@ -43,7 +42,6 @@ public class myConnection {
     public boolean insertDatas(PreparedStatement pst) {
         try {
             pst.executeUpdate();
-            System.out.println("Inserted Successfully!");
             pst.close();
             return true;
         } catch (SQLException ex) {

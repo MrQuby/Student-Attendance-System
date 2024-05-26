@@ -197,72 +197,104 @@ public class ChangePassword extends javax.swing.JFrame {
             if(jNewPassword.getText().isEmpty()){
                 jNewPassError.setText("Required");
             }else{
+                if(newPassword.length() < 8 || confirmNewPassword.length() < 8){
+                    jPassMatchError.setText("Password must at least 8 characters");
+                }else{
+                    jPassMatchError.setText("");
+                }
                 jNewPassError.setText("");
             }
+            
             if(jOldPassword.getText().isEmpty()){
                 jOldPassError.setText("Required");
             }else{
-                jOldPassError.setText("");
+                if(!currentPassword.equals(hashOldPassword)){
+                    jOldPassError.setText("Incorrect Old Password");
+                }else{
+                    jOldPassError.setText("");
+                }
             }
+            
             if(jConfirmNewPassword.getText().isEmpty()){
                 jConfirmNewPassError.setText("Required");
             }else{
+                if(confirmNewPassword.length() < 8 || newPassword.length() < 8){
+                    jPassMatchError.setText("Password must at least 8 characters");
+                }else{
+                    jPassMatchError.setText("");
+                }
+                jConfirmNewPassError.setText("");
+            }
+            
+             if(!jConfirmNewPassword.getText().isEmpty() && !jNewPassword.getText().isEmpty()){
+                 if(!newPassword.equals(confirmNewPassword)){
+                    jNewPassError.setText("Password does not match");
+                }else{
+                    jNewPassError.setText(""); 
+                }
+                jConfirmNewPassError.setText("");
+             }
+            return;
+        } else if(!currentPassword.equals(hashOldPassword) || newPassword.length() < 8 || (confirmNewPassword.length() < 8) || !newPassword.equals(confirmNewPassword)){
+            //check if oldPassword pass is correct or match to user current password
+            if(!currentPassword.equals(hashOldPassword)){
+                jOldPassError.setText("Incorrect Old Password");
+            }else{
+                jOldPassError.setText("");
+            }
+
+            // Check if new password or re-entered password length is less than 8 characters
+            if((newPassword.length() < 8) || (confirmNewPassword.length() < 8)){
+                jPassMatchError.setText("Password must at least 8 characters");
+                jConfirmNewPassError.setText("");
+                jNewPassError.setText("");
+            }else{
+                jPassMatchError.setText("");
+            }
+
+            //check if newPassword and ConfirmNewPassword does not match
+            if(!newPassword.equals(confirmNewPassword)){
+                jNewPassError.setText("Password does not match");
+                jConfirmNewPassError.setText("");
+            }else{
+                jNewPassError.setText("");
                 jConfirmNewPassError.setText("");
             }
             return;
-        }
-        
-        // Check if new password or re-entered password length is less than 8 characters
-        if((newPassword.length() < 8) || (confirmNewPassword.length() < 8)){
-            jPassMatchError.setText("Password must at least 8 characters");
-            return;
         }else{
-            jPassMatchError.setText("");
-        }
-        
-        //check if oldPassword pass is correct or match to user current password
-        if(!currentPassword.equals(hashOldPassword)){
-            jOldPassError.setText("Incorrect Old Password");
-            return;
-        }else{
-            jOldPassError.setText("");
-        }
-        
-        //check if newPassword and ConfirmNewPassword does not match
-        if(!newPassword.equals(confirmNewPassword)){
-            jNewPassError.setText("Password does not match");
-            return;
-        }else{
-            jNewPassError.setText("");
-        }
-        
-        //update password data to database
-        myConnection connection = new myConnection();
-        String query = "UPDATE teacher SET "
-                + "teacher_password = '"+ newPasswordHash +"' "
-                + "WHERE teacher_id = '"+ id +"'";
-        if(connection.insertData(query)){
-            showSuccessDialog("Update Successfully");
-            session.getData(id);
-            //history logs
-            String teacherGender;
-            if(session.getGender().equals("Male")){
-                teacherGender = "his";
+            //update password data to database
+            myConnection connection = new myConnection();
+            String query = "UPDATE teacher SET "
+                    + "teacher_password = '"+ newPasswordHash +"' "
+                    + "WHERE teacher_id = '"+ id +"'";
+            if(connection.insertData(query)){
+                showSuccessDialog("Update Successfully");
+                session.getData(id);
+                //history logs
+                String teacherGender;
+                if(session.getGender().equals("Male")){
+                    teacherGender = "his";
+                }else{
+                    teacherGender = "her";
+                }
+                int teacherID = session.getId();
+                LogsHistory logHistory = new LogsHistory();
+                logHistory.insertTeacherLog(teacherID, "Teacher updated " + teacherGender + " password");
+
+                TeacherProfile profileFrame = new TeacherProfile();
+                profileFrame.setVisible(true);
+                profileFrame.pack();
+                profileFrame.setLocationRelativeTo(null);
+                this.dispose();
             }else{
-                teacherGender = "her";
+                System.out.println("Connection Error");
             }
-            int teacherID = session.getId();
-            LogsHistory logHistory = new LogsHistory();
-            logHistory.insertTeacherLog(teacherID, "Teacher updated " + teacherGender + " password");
-            
-            TeacherProfile profileFrame = new TeacherProfile();
-            profileFrame.setVisible(true);
-            profileFrame.pack();
-            profileFrame.setLocationRelativeTo(null);
-            this.dispose();
-        }else{
-            System.out.println("Connection Error");
         }
+        
+        
+        
+        
+        
     }//GEN-LAST:event_jSaveActionPerformed
 
     private void jCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCancelActionPerformed

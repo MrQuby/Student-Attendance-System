@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import student.attendance.system.LoginPage;
 
@@ -65,12 +66,12 @@ public class TeacherDashBoard extends javax.swing.JFrame {
         panel.setBackground(new Color(40,110,210));
     }
     
-    //get number of students
+    //get number of active students
     public int getNumberOfStudents() {
         int studentCount = 0;
         myConnection connector = new myConnection();
         try {
-            String query = "SELECT COUNT(*) AS student_count FROM student WHERE student_archive = 'NO'";
+            String query = "SELECT COUNT(*) AS student_count FROM student WHERE student_status = 'ACTIVE' AND student_archive = 'NO'";
             ResultSet resultset = connector.getData(query);
             if (resultset.next()) {
                 studentCount = resultset.getInt("student_count");
@@ -82,7 +83,7 @@ public class TeacherDashBoard extends javax.swing.JFrame {
         return studentCount;
     }
     
-    //get number of teacher
+    //get number of active teacher
     public int getNumberOfTeachers() {
         int studentCount = 0;
         myConnection connector = new myConnection();
@@ -613,15 +614,19 @@ public class TeacherDashBoard extends javax.swing.JFrame {
 
     //logout button
     private void jLogoutButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLogoutButtonMouseClicked
-        Session session = Session.getInstance();
-        int id = session.getId();
-        LogsHistory logHistory = new LogsHistory();
-        logHistory.insertTeacherLog(id, "Teacher Logout");
-        LoginPage loginFrame = new LoginPage();
-        loginFrame.setVisible(true);
-        loginFrame.pack();
-        loginFrame.setLocationRelativeTo(null);
-        this.dispose();
+        int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to logout?", "", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION){
+            //history logs
+            Session session = Session.getInstance();
+            int id = session.getId();
+            LogsHistory logHistory = new LogsHistory();
+            logHistory.insertTeacherLog(id, "Teacher Logout");
+            LoginPage loginFrame = new LoginPage();
+            loginFrame.setVisible(true);
+            loginFrame.pack();
+            loginFrame.setLocationRelativeTo(null);
+            this.dispose();
+        }
     }//GEN-LAST:event_jLogoutButtonMouseClicked
 
     private void jLogoutButtonMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLogoutButtonMouseEntered

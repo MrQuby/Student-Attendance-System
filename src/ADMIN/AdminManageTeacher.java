@@ -22,7 +22,6 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import net.proteanit.sql.DbUtils;
@@ -167,7 +166,7 @@ public class AdminManageTeacher extends javax.swing.JFrame {
     public void displayPendingDataTable(){
         try{
             myConnection dbc = new myConnection();
-            ResultSet rs = dbc.getData("SELECT teacher_id,teacher_name,teacher_birthdate,teacher_address,teacher_status FROM teacher WHERE teacher_status = 'PENDING'");
+            ResultSet rs = dbc.getData("SELECT teacher_id,teacher_name,teacher_birthdate,teacher_address,teacher_status FROM teacher WHERE teacher_archive = 'NO' AND teacher_status = 'PENDING'");
             jteacher_Table.setModel(DbUtils.resultSetToTableModel(rs));
             tableSettings();
             rs.close();
@@ -180,7 +179,7 @@ public class AdminManageTeacher extends javax.swing.JFrame {
     public void displayDataTable(){
         try{
             myConnection dbc = new myConnection();
-            ResultSet rs = dbc.getData("SELECT teacher_id,teacher_name,teacher_birthdate,teacher_address,teacher_status FROM teacher");
+            ResultSet rs = dbc.getData("SELECT teacher_id,teacher_name,teacher_birthdate,teacher_address,teacher_status FROM teacher WHERE teacher_archive = 'NO'");
             jteacher_Table.setModel(DbUtils.resultSetToTableModel(rs));
             tableSettings();
             rs.close();
@@ -193,7 +192,7 @@ public class AdminManageTeacher extends javax.swing.JFrame {
     public void displayActiveDataTable(){
         try{
             myConnection dbc = new myConnection();
-            ResultSet rs = dbc.getData("SELECT teacher_id,teacher_name,teacher_birthdate,teacher_address,teacher_status FROM teacher WHERE teacher_status = 'ACTIVE'");
+            ResultSet rs = dbc.getData("SELECT teacher_id,teacher_name,teacher_birthdate,teacher_address,teacher_status FROM teacher WHERE teacher_archive = 'NO' AND teacher_status = 'ACTIVE'");
             jteacher_Table.setModel(DbUtils.resultSetToTableModel(rs));
             tableSettings();
             rs.close();
@@ -232,36 +231,41 @@ public class AdminManageTeacher extends javax.swing.JFrame {
         }
     }
 
-    //deleted the selected ID
-    private void deleteSelectedRow() {
+    
+    //archieve the selected ID
+    private void archiveSelectedRow() {
         int selectedRow = jteacher_Table.getSelectedRow();
         if (selectedRow >= 0) {
-            int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this record?", "", JOptionPane.YES_NO_OPTION);
+            int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to archive this record?", "", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                int teacherID = (int)jteacher_Table.getValueAt(selectedRow, 0); // Assuming student ID is in the first column
-                String query = "DELETE FROM teacher WHERE teacher_id = '" + teacherID + "'";
+                int teacherID = (int)jteacher_Table.getValueAt(selectedRow, 0); // Assuming teacher ID is in the first column
+                String query = "UPDATE teacher SET teacher_archive = 'YES',teacher_status = 'INACTIVE' WHERE teacher_id = '" + teacherID + "'";
                 myConnection dbc = new myConnection();
-                if (dbc.insertData(query)) {
-                    ((DefaultTableModel)jteacher_Table.getModel()).removeRow(selectedRow);
-                    showSuccessDialog("Teacher ID " + teacherID + " Record deleted successfully.");
+                if(dbc.insertData(query)){
+                    showSuccessDialog("Teacher ID " + teacherID + " Record archive successfully.");
                     //history logs
                     LogsHistory logHistory = new LogsHistory();
-                    logHistory.insertAdminLog(adminID, "Admin deleted teacher with ID number " + teacherID);
-                } else {
-                    JOptionPane.showMessageDialog(null, "Failed to delete record.", "Error", JOptionPane.ERROR_MESSAGE);
+                    logHistory.insertAdminLog(adminID, "Admin archived teacher with ID number " + teacherID);
+                    
+                    displayDataTable();
+                }else{
+                    JOptionPane.showMessageDialog(null, "Failed to archive record.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         } else {
-            JOptionPane.showMessageDialog(null, "Please select a row to delete.", "No Row Selected", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Please select a row to archive.", "No Row Selected", JOptionPane.WARNING_MESSAGE);
         }
     }
-
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel10 = new javax.swing.JLabel();
+        jAdminName = new javax.swing.JLabel();
+        datetime = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jDashboard = new javax.swing.JPanel();
@@ -274,10 +278,8 @@ public class AdminManageTeacher extends javax.swing.JFrame {
         jLabel12 = new javax.swing.JLabel();
         jHistoryLogs = new javax.swing.JPanel();
         jLabel11 = new javax.swing.JLabel();
-        jPanel3 = new javax.swing.JPanel();
-        jLabel10 = new javax.swing.JLabel();
-        jAdminName = new javax.swing.JLabel();
-        datetime = new javax.swing.JLabel();
+        jArchiveTeacher = new javax.swing.JPanel();
+        jLabel13 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jteacher_Table = new javax.swing.JTable();
@@ -285,9 +287,10 @@ public class AdminManageTeacher extends javax.swing.JFrame {
         SCCLogo = new javax.swing.JLabel();
         ITLogo = new javax.swing.JLabel();
         jError = new javax.swing.JLabel();
+        jApprove = new javax.swing.JButton();
         jArchive = new javax.swing.JButton();
-        jArchive1 = new javax.swing.JButton();
         jListOfTeacher = new javax.swing.JComboBox<>();
+        jRefresh = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("TEACHER MANAGE STUDENT");
@@ -306,6 +309,29 @@ public class AdminManageTeacher extends javax.swing.JFrame {
         jPanel1.setMinimumSize(new java.awt.Dimension(0, 0));
         jPanel1.setPreferredSize(new java.awt.Dimension(1100, 700));
         jPanel1.setLayout(null);
+
+        jPanel3.setBackground(new java.awt.Color(25, 118, 211));
+        jPanel3.setLayout(null);
+
+        jLabel10.setFont(new java.awt.Font("Segoe UI Semibold", 0, 20)); // NOI18N
+        jLabel10.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel10.setText("Admin:");
+        jPanel3.add(jLabel10);
+        jLabel10.setBounds(20, 30, 70, 30);
+
+        jAdminName.setFont(new java.awt.Font("Segoe UI Semibold", 0, 20)); // NOI18N
+        jAdminName.setForeground(new java.awt.Color(255, 255, 255));
+        jPanel3.add(jAdminName);
+        jAdminName.setBounds(100, 30, 240, 30);
+
+        datetime.setBackground(new java.awt.Color(255, 255, 255));
+        datetime.setFont(new java.awt.Font("Segoe UI Semibold", 0, 20)); // NOI18N
+        datetime.setForeground(new java.awt.Color(255, 255, 255));
+        jPanel3.add(datetime);
+        datetime.setBounds(410, 30, 440, 40);
+
+        jPanel1.add(jPanel3);
+        jPanel3.setBounds(220, 90, 880, 100);
 
         jPanel2.setBackground(new java.awt.Color(25, 118, 211));
         jPanel2.setLayout(null);
@@ -402,7 +428,7 @@ public class AdminManageTeacher extends javax.swing.JFrame {
         jLabel12.setBounds(30, 0, 130, 50);
 
         jPanel2.add(jLogoutButton);
-        jLogoutButton.setBounds(0, 340, 220, 50);
+        jLogoutButton.setBounds(0, 390, 220, 50);
 
         jHistoryLogs.setBackground(new java.awt.Color(40, 110, 210));
         jHistoryLogs.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -427,33 +453,38 @@ public class AdminManageTeacher extends javax.swing.JFrame {
         jLabel11.setBounds(30, 0, 170, 50);
 
         jPanel2.add(jHistoryLogs);
-        jHistoryLogs.setBounds(0, 290, 220, 50);
+        jHistoryLogs.setBounds(0, 340, 220, 50);
+
+        jArchiveTeacher.setBackground(new java.awt.Color(40, 110, 210));
+        jArchiveTeacher.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jArchiveTeacher.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jArchiveTeacherMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jArchiveTeacherMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                jArchiveTeacherMouseExited(evt);
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jArchiveTeacherMousePressed(evt);
+            }
+        });
+        jArchiveTeacher.setLayout(null);
+
+        jLabel13.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel13.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/ARCHIEVE.png"))); // NOI18N
+        jLabel13.setText("  Archive Teacher");
+        jArchiveTeacher.add(jLabel13);
+        jLabel13.setBounds(30, 0, 170, 50);
+
+        jPanel2.add(jArchiveTeacher);
+        jArchiveTeacher.setBounds(0, 290, 220, 50);
 
         jPanel1.add(jPanel2);
         jPanel2.setBounds(0, 0, 220, 700);
-
-        jPanel3.setBackground(new java.awt.Color(25, 118, 211));
-        jPanel3.setLayout(null);
-
-        jLabel10.setFont(new java.awt.Font("Segoe UI Semibold", 0, 20)); // NOI18N
-        jLabel10.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel10.setText("Admin:");
-        jPanel3.add(jLabel10);
-        jLabel10.setBounds(20, 30, 70, 30);
-
-        jAdminName.setFont(new java.awt.Font("Segoe UI Semibold", 0, 20)); // NOI18N
-        jAdminName.setForeground(new java.awt.Color(255, 255, 255));
-        jPanel3.add(jAdminName);
-        jAdminName.setBounds(100, 30, 240, 30);
-
-        datetime.setBackground(new java.awt.Color(255, 255, 255));
-        datetime.setFont(new java.awt.Font("Segoe UI Semibold", 0, 20)); // NOI18N
-        datetime.setForeground(new java.awt.Color(255, 255, 255));
-        jPanel3.add(datetime);
-        datetime.setBounds(410, 30, 440, 40);
-
-        jPanel1.add(jPanel3);
-        jPanel3.setBounds(220, 90, 880, 100);
 
         jLabel8.setBackground(new java.awt.Color(25, 118, 211));
         jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
@@ -487,10 +518,27 @@ public class AdminManageTeacher extends javax.swing.JFrame {
         jPanel1.add(jError);
         jError.setBounds(860, 240, 130, 16);
 
+        jApprove.setBackground(new java.awt.Color(51, 153, 255));
+        jApprove.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
+        jApprove.setForeground(new java.awt.Color(255, 255, 255));
+        jApprove.setText("APPROVE");
+        jApprove.setContentAreaFilled(false);
+        jApprove.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jApprove.setFocusPainted(false);
+        jApprove.setOpaque(true);
+        jApprove.setPreferredSize(new java.awt.Dimension(85, 24));
+        jApprove.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jApproveActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jApprove);
+        jApprove.setBounds(230, 260, 85, 24);
+
         jArchive.setBackground(new java.awt.Color(51, 153, 255));
         jArchive.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
         jArchive.setForeground(new java.awt.Color(255, 255, 255));
-        jArchive.setText("APPROVE");
+        jArchive.setText("ARCHIVE");
         jArchive.setContentAreaFilled(false);
         jArchive.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jArchive.setFocusPainted(false);
@@ -502,29 +550,29 @@ public class AdminManageTeacher extends javax.swing.JFrame {
             }
         });
         jPanel1.add(jArchive);
-        jArchive.setBounds(230, 260, 85, 24);
-
-        jArchive1.setBackground(new java.awt.Color(51, 153, 255));
-        jArchive1.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
-        jArchive1.setForeground(new java.awt.Color(255, 255, 255));
-        jArchive1.setText("DELETE");
-        jArchive1.setContentAreaFilled(false);
-        jArchive1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jArchive1.setFocusPainted(false);
-        jArchive1.setOpaque(true);
-        jArchive1.setPreferredSize(new java.awt.Dimension(85, 24));
-        jArchive1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jArchive1ActionPerformed(evt);
-            }
-        });
-        jPanel1.add(jArchive1);
-        jArchive1.setBounds(330, 260, 85, 24);
+        jArchive.setBounds(330, 260, 85, 24);
 
         jListOfTeacher.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
-        jListOfTeacher.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ALL TEACHERS", "PENDING", "ACTIVE", " " }));
+        jListOfTeacher.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ALL TEACHERS", "PENDING", "ACTIVE" }));
         jPanel1.add(jListOfTeacher);
-        jListOfTeacher.setBounds(430, 260, 120, 24);
+        jListOfTeacher.setBounds(530, 260, 120, 24);
+
+        jRefresh.setBackground(new java.awt.Color(51, 153, 255));
+        jRefresh.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
+        jRefresh.setForeground(new java.awt.Color(255, 255, 255));
+        jRefresh.setText("REFRESH");
+        jRefresh.setContentAreaFilled(false);
+        jRefresh.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jRefresh.setFocusPainted(false);
+        jRefresh.setOpaque(true);
+        jRefresh.setPreferredSize(new java.awt.Dimension(85, 24));
+        jRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRefreshActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jRefresh);
+        jRefresh.setBounds(430, 260, 85, 24);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -583,15 +631,18 @@ public class AdminManageTeacher extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowActivated
 
     private void jLogoutButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLogoutButtonMouseClicked
-        //history logs
-        LogsHistory logHistory = new LogsHistory();
-        logHistory.insertAdminLog(adminID, "Admin Logout");
-        
-        LoginPage loginFrame = new LoginPage();
-        loginFrame.setVisible(true);
-        loginFrame.pack();
-        loginFrame.setLocationRelativeTo(null);
-        this.dispose();
+        int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to logout?", "", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION){
+            //history logs
+            LogsHistory logHistory = new LogsHistory();
+            logHistory.insertAdminLog(adminID, "Admin Logout");
+
+            LoginPage loginFrame = new LoginPage();
+            loginFrame.setVisible(true);
+            loginFrame.pack();
+            loginFrame.setLocationRelativeTo(null);
+            this.dispose();
+        }
     }//GEN-LAST:event_jLogoutButtonMouseClicked
 
     private void jLogoutButtonMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLogoutButtonMouseEntered
@@ -602,13 +653,13 @@ public class AdminManageTeacher extends javax.swing.JFrame {
         resetColor(jLogoutButton);
     }//GEN-LAST:event_jLogoutButtonMouseExited
     //approve button
-    private void jArchiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jArchiveActionPerformed
+    private void jApproveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jApproveActionPerformed
         approveSelectedRow();
-    }//GEN-LAST:event_jArchiveActionPerformed
+    }//GEN-LAST:event_jApproveActionPerformed
     //delete button
-    private void jArchive1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jArchive1ActionPerformed
-        deleteSelectedRow();
-    }//GEN-LAST:event_jArchive1ActionPerformed
+    private void jArchiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jArchiveActionPerformed
+        archiveSelectedRow();
+    }//GEN-LAST:event_jArchiveActionPerformed
 
     private void jHistoryLogsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jHistoryLogsMouseClicked
         AdminTeacherHistoryLogs logsFrame = new AdminTeacherHistoryLogs();
@@ -625,6 +676,30 @@ public class AdminManageTeacher extends javax.swing.JFrame {
     private void jHistoryLogsMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jHistoryLogsMouseExited
         resetColor(jHistoryLogs);
     }//GEN-LAST:event_jHistoryLogsMouseExited
+
+    private void jArchiveTeacherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jArchiveTeacherMouseClicked
+        AdminTeacherArchive archiveFrame = new AdminTeacherArchive();
+        archiveFrame.setVisible(true);
+        archiveFrame.pack();
+        archiveFrame.setLocationRelativeTo(null);
+        this.dispose();
+    }//GEN-LAST:event_jArchiveTeacherMouseClicked
+
+    private void jArchiveTeacherMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jArchiveTeacherMouseEntered
+        setColor(jArchiveTeacher);
+    }//GEN-LAST:event_jArchiveTeacherMouseEntered
+
+    private void jArchiveTeacherMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jArchiveTeacherMouseExited
+        resetColor(jArchiveTeacher);
+    }//GEN-LAST:event_jArchiveTeacherMouseExited
+
+    private void jArchiveTeacherMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jArchiveTeacherMousePressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jArchiveTeacherMousePressed
+
+    private void jRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRefreshActionPerformed
+        displayDataTable();
+    }//GEN-LAST:event_jRefreshActionPerformed
 
     
     
@@ -645,8 +720,9 @@ public class AdminManageTeacher extends javax.swing.JFrame {
     private javax.swing.JLabel SCCLogo;
     private javax.swing.JLabel datetime;
     public javax.swing.JLabel jAdminName;
+    private javax.swing.JButton jApprove;
     private javax.swing.JButton jArchive;
-    private javax.swing.JButton jArchive1;
+    private javax.swing.JPanel jArchiveTeacher;
     private javax.swing.JPanel jDashboard;
     private javax.swing.JLabel jError;
     private javax.swing.JPanel jHistoryLogs;
@@ -654,6 +730,7 @@ public class AdminManageTeacher extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel6;
@@ -666,6 +743,7 @@ public class AdminManageTeacher extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JButton jRefresh;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jteacher_Table;
     // End of variables declaration//GEN-END:variables

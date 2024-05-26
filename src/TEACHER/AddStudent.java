@@ -93,7 +93,7 @@ public class AddStudent extends javax.swing.JFrame {
             pst.setString(5, jAddress.getText());
             pst.setBinaryStream(6, inputImage);
             pst.setString(7, (String)jStatus.getSelectedItem());
-            pst.setString(8, "YES");
+            pst.setString(8, "NO");
             if(connector.insertDatas(pst)){
                 showSuccessDialog("Register successfully");
                 //history logs

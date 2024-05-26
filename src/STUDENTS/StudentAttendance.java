@@ -165,7 +165,7 @@ public class StudentAttendance extends javax.swing.JFrame {
 
         try{
             myConnection dbc = new myConnection();
-            ResultSet rs = dbc.getData("SELECT student.student_id, student.student_fullname, attendance_table.time_in, attendance_table.time_out, attendance_table.date "
+            ResultSet rs = dbc.getData("SELECT attendance_table.student_id, student.student_fullname, attendance_table.time_in, attendance_table.time_out, attendance_table.date "
                     + "FROM student "
                     + "INNER JOIN attendance_table ON student.student_id = attendance_table.student_id "
                     + "WHERE attendance_table.date = '" + currentDate + "'");
@@ -346,6 +346,12 @@ public class StudentAttendance extends javax.swing.JFrame {
             String checkAttendanceQuery = "SELECT * FROM attendance_table WHERE student_id = '" + id + "' AND date = '" + currentDate + "'";
             ResultSet attendanceResultSet = connector.getData(checkAttendanceQuery);
             
+            // Check if the student is already checked out today
+            ResultSet attendanceRs = connector.getData("SELECT time_out FROM attendance_table WHERE student_id = " + id + " AND date = '" + currentDate + "'");
+            if (attendanceRs.next() && attendanceRs.getTime("time_out") != null) {
+                return;
+            }
+            
             if (attendanceResultSet.next()) {
                 // Student has already checked in, so update the timeOut value
                 String updateTimeOutQuery = "UPDATE attendance_table SET time_out = ? WHERE student_id = ? AND date = ?";
@@ -356,6 +362,8 @@ public class StudentAttendance extends javax.swing.JFrame {
                 updateTimeOutStmt.executeUpdate();
                 
                 // Update status label to indicate student checked out
+                Font font = new Font("Segoe UI", Font.BOLD, 50);
+                jStatus1.setFont(font);
                 jStatus1.setText("CHECKED OUT");
                 jStatus1.setForeground(Color.RED);
             } else {
@@ -368,6 +376,8 @@ public class StudentAttendance extends javax.swing.JFrame {
                 insertAttendanceStmt.executeUpdate();
                 
                 // Update status label to indicate student checked in
+                Font font = new Font("Segoe UI", Font.BOLD, 50);
+                jStatus1.setFont(font);
                 jStatus1.setText("CHECKED IN");
                 jStatus1.setForeground(Color.BLUE);
                 studentCheckInTimes.put(id, now);
@@ -421,19 +431,6 @@ public class StudentAttendance extends javax.swing.JFrame {
                 System.out.println("Invalid RFID tag ID format.");
                 return;
             }
-            
-            // Check if the student has already checked in within the last minute
-            if (hasCheckedInWithinLastMinute(studentId)) {
-                JOptionPane.showMessageDialog(null,"You cannot check out yet. Please wait for one minute after checking in","Check-out Error",JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        
-            // Check if the student has already checked out today
-            if (hasCheckedOutToday(studentId)) {
-                JOptionPane.showMessageDialog(null,"You have already checked out today","Check-out Error",JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            
             // Get student details
             String name = getName(studentId);
             String department = getDepartment(studentId);
@@ -442,6 +439,33 @@ public class StudentAttendance extends javax.swing.JFrame {
             if (name != null) {
                 name = name.toUpperCase();
             }
+            
+            // Check if the student has already checked in within the last minute
+            if (hasCheckedInWithinLastMinute(studentId)) {
+                //JOptionPane.showMessageDialog(null,"You cannot check out yet. Please wait for one minute after checking in","Check-out Error",JOptionPane.ERROR_MESSAGE);
+                showImage(Integer.valueOf(tagId));
+                Font font = new Font("Segoe UI", Font.BOLD, 39);
+                jStatus1.setFont(font);
+                jStatus1.setText("WAIT ONE MINUTE BEFORE CHECKING OUT");
+                jStatus1.setForeground(Color.RED);
+                jDepartment1.setText(department);
+                jStudentName1.setText(name);
+                return;
+            }
+        
+            // Check if the student has already checked out today
+            if (hasCheckedOutToday(studentId)) {
+                //JOptionPane.showMessageDialog(null,"You have already checked out today","Check-out Error",JOptionPane.ERROR_MESSAGE);
+                // Update status label to indicate student checked out
+                showImage(Integer.valueOf(tagId));
+                jStatus1.setText("ALREADY CHECKED OUT");
+                jStatus1.setForeground(Color.RED);
+                jDepartment1.setText(department);
+                jStudentName1.setText(name);
+                return;
+            }
+            
+            
             if(isIDRegister(Integer.valueOf(tagId))){
                 handleAttendance(studentId);
                 showImage(Integer.valueOf(tagId));
@@ -450,10 +474,14 @@ public class StudentAttendance extends javax.swing.JFrame {
                 rotateStudentData(name, department, image, jStatus1.getText());  // Rotate student data               
                 updatePanels(); // Update panels with latest student data
             }else{
-                jStudentName1.setText("INVALID STUDENT");
-                jStudentName1.setForeground(Color.RED);
+                Font font = new Font("Segoe UI", Font.BOLD, 50);
+                jStatus1.setFont(font);
+                jStatus1.setText("UNKNOWN STUDENT");
+                jStatus1.setForeground(Color.RED);
+                jStudentName1.setText("");
                 jDepartment1.setText("");
-                jImage1.setIcon(null);
+                ImageIcon  image1 = new ImageIcon(new ImageIcon("src/icon/unknown profile.png").getImage().getScaledInstance(jImage1.getWidth(), jImage1.getHeight(), Image.SCALE_SMOOTH));
+                jImage1.setIcon(image1);
             }
             evt.consume();
         }
