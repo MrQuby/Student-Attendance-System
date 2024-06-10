@@ -489,7 +489,7 @@ public class TeacherDashBoard extends javax.swing.JFrame {
         jPanel1.add(jDisplayAttendance);
         jDisplayAttendance.setBounds(520, 470, 280, 110);
         jPanel1.add(ITLogo);
-        ITLogo.setBounds(1000, 10, 70, 70);
+        ITLogo.setBounds(980, 10, 70, 70);
         jPanel1.add(SCCLogo);
         SCCLogo.setBounds(250, 10, 90, 70);
 

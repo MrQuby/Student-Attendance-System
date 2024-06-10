@@ -32,7 +32,7 @@ public class LogsHistory {
             // Close the statement
             insertAttendanceStmt.close();
         } catch (Exception ex) {
-            System.out.println("Error inserting login log: " + ex.getMessage());
+            System.out.println("Error inserting teacher login log: " + ex.getMessage());
         }
     }
     
@@ -57,7 +57,7 @@ public class LogsHistory {
             // Close the statement
             insertAttendanceStmt.close();
         } catch (Exception ex) {
-            System.out.println("Error inserting login log: " + ex.getMessage());
+            System.out.println("Error inserting admin login log: " + ex.getMessage());
         }
     }
 }

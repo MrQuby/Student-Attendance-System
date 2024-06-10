@@ -3,26 +3,38 @@ package TEACHER;
 
 
 
-
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import config.LogsHistory;
 import config.Session;
 import config.myConnection;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.swing.JPanel;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -105,18 +117,19 @@ public class TeacherManageStudent extends javax.swing.JFrame {
         //change the column header name
         TableColumnModel columnModel = jstudent_Table.getColumnModel();
         columnModel.getColumn(0).setHeaderValue("Student ID");
-        columnModel.getColumn(1).setHeaderValue("Full Name");
-        columnModel.getColumn(2).setHeaderValue("Birthdate");
-        columnModel.getColumn(3).setHeaderValue("Department");
-        columnModel.getColumn(4).setHeaderValue("Address");
-        columnModel.getColumn(5).setHeaderValue("Status");
+        columnModel.getColumn(1).setHeaderValue("Student RFID");
+        columnModel.getColumn(2).setHeaderValue("Full Name");
+        columnModel.getColumn(3).setHeaderValue("Birthdate");
+        columnModel.getColumn(4).setHeaderValue("Department");
+        columnModel.getColumn(5).setHeaderValue("Address");
+        columnModel.getColumn(6).setHeaderValue("Status");
 
         //size of the row height
         jstudent_Table.setRowHeight(20);
         
         //size of column by percent
         int totalWidth = jstudent_Table.getWidth();
-        double[] columnWidthPercentages = {12, 20, 12, 12, 24, 12};
+        double[] columnWidthPercentages = {10, 10, 20, 10, 10, 24, 8};
         int[] columnWidths = new int[columnWidthPercentages.length];
 
         for (int i = 0; i < columnWidthPercentages.length; i++) {
@@ -129,6 +142,7 @@ public class TeacherManageStudent extends javax.swing.JFrame {
         columnModel.getColumn(3).setPreferredWidth(columnWidths[3]);
         columnModel.getColumn(4).setPreferredWidth(columnWidths[4]);
         columnModel.getColumn(5).setPreferredWidth(columnWidths[5]);
+        columnModel.getColumn(6).setPreferredWidth(columnWidths[6]);
         
         // Set font properties for the header
         Font headerFont = new Font("Segoe UI", Font.PLAIN, 14);
@@ -150,7 +164,7 @@ public class TeacherManageStudent extends javax.swing.JFrame {
     public void displayDataTable(){
         try{
             myConnection dbc = new myConnection();
-            ResultSet rs = dbc.getData("SELECT student_id,student_fullname,student_birthdate,student_department,student_address,student_status FROM student WHERE student_archive = 'NO'");
+            ResultSet rs = dbc.getData("SELECT student_id,student_rfid,student_fullname,student_birthdate,student_department,student_address,student_status FROM student WHERE student_archive = 'NO'");
             jstudent_Table.setModel(DbUtils.resultSetToTableModel(rs));
             
             //clear the searchfield if click to table
@@ -214,21 +228,22 @@ public class TeacherManageStudent extends javax.swing.JFrame {
             TableModel model = jstudent_Table.getModel();
             UpdateStudent updateFrame = new UpdateStudent();
             int studentID = (int) model.getValueAt(rowindex, 0);
-            updateFrame.jStudentID.setText("" + model.getValueAt(rowindex, 0));
+            updateFrame.jStudentID.setText("" + (int)model.getValueAt(rowindex, 0));
             updateFrame.jStudentID.setEditable(false);
-            updateFrame.jFullName.setText("" + model.getValueAt(rowindex, 1));
+            updateFrame.jStudentRFID.setText("" + (int)model.getValueAt(rowindex, 1));
+            updateFrame.jFullName.setText("" + model.getValueAt(rowindex, 2));
 
             try {
-                java.sql.Date sqlDate = (java.sql.Date) model.getValueAt(rowindex, 2);
+                java.sql.Date sqlDate = (java.sql.Date) model.getValueAt(rowindex, 3);
                 Date utilDate = new Date(sqlDate.getTime());
                 updateFrame.jBirthdate.setDate(utilDate);
             } catch (IllegalArgumentException ex) {
                 System.out.println(ex.getMessage());
             }
             
-            updateFrame.jDepartment.setSelectedItem("" + model.getValueAt(rowindex, 3));
-            updateFrame.jAddress.setText("" + model.getValueAt(rowindex, 4));
-            updateFrame.jStatus.setSelectedItem("" + model.getValueAt(rowindex, 5));
+            updateFrame.jDepartment.setSelectedItem("" + model.getValueAt(rowindex, 4));
+            updateFrame.jAddress.setText("" + model.getValueAt(rowindex, 5));
+            updateFrame.jStatus.setSelectedItem("" + model.getValueAt(rowindex, 6));
             
             updateFrame.setVisible(true);
             updateFrame.pack();
@@ -246,7 +261,7 @@ public class TeacherManageStudent extends javax.swing.JFrame {
                 jError.setText("");
                 myConnection dbc = new myConnection();
                 int studentID = Integer.parseInt(searchText);
-                String query = "SELECT student_id, student_fullname, student_birthdate, student_department, student_address, student_status FROM student WHERE student_archive = 'NO' AND student_id = " + studentID;
+                String query = "SELECT student_id, student_rfid, student_fullname, student_birthdate, student_department, student_address, student_status FROM student WHERE student_archive = 'NO' AND student_id = '"+ studentID+"'";
                 ResultSet rs = dbc.getData(query);
                 jstudent_Table.setModel(DbUtils.resultSetToTableModel(rs));
                 tableSettings();
@@ -263,6 +278,185 @@ public class TeacherManageStudent extends javax.swing.JFrame {
         }
     }
     
+    public void exportTableDataToExcel() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save Table Data as Excel");
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+            if (!filePath.toLowerCase().endsWith(".xlsx")) {
+                filePath += ".xlsx";
+            }
+            try (Workbook workbook = new XSSFWorkbook()) {
+                Sheet sheet = workbook.createSheet("Table Data");
+
+                TableModel model = jstudent_Table.getModel();
+
+                // Write column headers
+                Row headerRow = sheet.createRow(0);
+                for (int col = 0; col < model.getColumnCount(); col++) {
+                    Cell cell = headerRow.createCell(col);
+                    cell.setCellValue(model.getColumnName(col));
+                }
+
+                // Write row data
+                for (int row = 0; row < model.getRowCount(); row++) {
+                    Row dataRow = sheet.createRow(row + 1);
+                    for (int col = 0; col < model.getColumnCount(); col++) {
+                        Cell cell = dataRow.createCell(col);
+                        Object cellData = model.getValueAt(row, col);
+                        if (cellData != null) {
+                            cell.setCellValue(cellData.toString());
+                        }
+                    }
+                }
+
+                try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
+                    workbook.write(fileOut);
+                }
+
+                JOptionPane.showMessageDialog(this, "Table data exported successfully to " + filePath, "Export Success", JOptionPane.INFORMATION_MESSAGE);
+                Session session = Session.getInstance();
+                int id = session.getId();
+                LogsHistory logHistory = new LogsHistory();
+                logHistory.insertTeacherLog(id, "Teacher exported Excel attendance table data");
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Error exporting data: " + e.getMessage(), "Export Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    public void importExcelData() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Open Excel File");
+        // Add filter for Excel files
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel Files", "xlsx", "xls");
+        fileChooser.setFileFilter(filter);
+        int userSelection = fileChooser.showOpenDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+
+            try (FileInputStream fis = new FileInputStream(file);
+                 Workbook workbook = new XSSFWorkbook(fis)) {
+
+                Sheet sheet = workbook.getSheetAt(0);
+                Iterator<Row> rowIterator = sheet.iterator();
+
+                if (!rowIterator.hasNext()) {
+                    throw new IOException("The Excel file is empty.");
+                }
+
+                // Read the headers
+                Row headerRow = rowIterator.next();
+                Iterator<Cell> headerCellIterator = headerRow.cellIterator();
+                List<String> headers = new ArrayList<>();
+
+                while (headerCellIterator.hasNext()) {
+                    headers.add(headerCellIterator.next().getStringCellValue());
+                }
+
+                DefaultTableModel model = new DefaultTableModel(headers.toArray(), 0);
+                List<String[]> data = new ArrayList<>();
+
+                while (rowIterator.hasNext()) {
+                    Row row = rowIterator.next();
+                    String[] rowData = new String[headers.size()];
+                    for (int col = 0; col < headers.size(); col++) {
+                        Cell cell = row.getCell(col);
+                        if (cell != null) {
+                            rowData[col] = cell.toString();
+                        } else {
+                            rowData[col] = "";
+                        }
+                    }
+                    data.add(rowData);
+                    model.addRow(rowData);
+                }
+
+                jstudent_Table.setModel(model);
+                tableSettings(); // Apply table settings
+
+                // Insert or update database
+                insertOrUpdateDatabase(data);
+
+                JOptionPane.showMessageDialog(this, "Excel data imported successfully.", "Import Success", JOptionPane.INFORMATION_MESSAGE);
+                Session session = Session.getInstance();
+                int id = session.getId();
+                LogsHistory logHistory = new LogsHistory();
+                logHistory.insertTeacherLog(id, "Teacher imported Excel attendance table data");
+
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Error importing data: " + e.getMessage(), "Import Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void insertOrUpdateDatabase(List<String[]> data) {
+        myConnection dbc = new myConnection();
+        Connection connector = dbc.connect;
+
+        try {
+            for (String[] row : data) {
+                if (row.length != 7) {
+                    System.out.println("Skipping invalid row: " + String.join(", ", row));
+                    continue;
+                }
+
+                String studentId = row[0].trim();
+                String studentRfid = row[1].trim();
+                String fullName = row[2].trim();
+                String birthdate = row[3].trim();
+                String department = row[4].trim();
+                String address = row[5].trim();
+                String status = row[6].trim();
+
+                // Check if record exists
+                String checkQuery = "SELECT * FROM student WHERE student_id = ?";
+                try (PreparedStatement checkStmt = connector.prepareStatement(checkQuery)) {
+                    checkStmt.setString(1, studentId);
+                    ResultSet rs = checkStmt.executeQuery();
+
+                    if (rs.next()) {
+                        // Update existing record
+                        String updateQuery = "UPDATE student SET student_rfid = ?, student_fullname = ?, student_birthdate = ?, student_department = ?, student_address = ?, student_status = ?, student_archive = 'NO' WHERE student_id = ?";
+                        try (PreparedStatement pstmt = connector.prepareStatement(updateQuery)) {
+                            pstmt.setString(1, studentRfid);
+                            pstmt.setString(2, fullName);
+                            pstmt.setString(3, birthdate);
+                            pstmt.setString(4, department);
+                            pstmt.setString(5, address);
+                            pstmt.setString(6, status);
+                            pstmt.setString(7, studentId);
+                            pstmt.executeUpdate();
+                        }
+                    } else {
+                        // Insert new record
+                        String insertQuery = "INSERT INTO student (student_id, student_rfid, student_fullname, student_birthdate, student_department, student_address, student_status, student_archive) VALUES (?, ?, ?, ?, ?, ?, ?, 'NO')";
+                        try (PreparedStatement pstmt = connector.prepareStatement(insertQuery)) {
+                            pstmt.setString(1, studentId);
+                            pstmt.setString(2, studentRfid);
+                            pstmt.setString(3, fullName);
+                            pstmt.setString(4, birthdate);
+                            pstmt.setString(5, department);
+                            pstmt.setString(6, address);
+                            pstmt.setString(7, status);
+                            pstmt.executeUpdate();
+                        }
+                    }
+                    rs.close();
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error updating database: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -301,6 +495,8 @@ public class TeacherManageStudent extends javax.swing.JFrame {
         ITLogo = new javax.swing.JLabel();
         jError = new javax.swing.JLabel();
         jArchive = new javax.swing.JButton();
+        jButtonRefreshData1 = new javax.swing.JButton();
+        jButtonRefreshData2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("TEACHER MANAGE STUDENT");
@@ -330,12 +526,12 @@ public class TeacherManageStudent extends javax.swing.JFrame {
         jProfileSettings.setBackground(new java.awt.Color(40, 110, 210));
         jProfileSettings.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jProfileSettings.addAncestorListener(new javax.swing.event.AncestorListener() {
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
+            }
             public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
                 jProfileSettingsAncestorAdded(evt);
             }
             public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
-            }
-            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
             }
         });
         jProfileSettings.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -656,6 +852,40 @@ public class TeacherManageStudent extends javax.swing.JFrame {
         jPanel1.add(jArchive);
         jArchive.setBounds(430, 260, 85, 24);
 
+        jButtonRefreshData1.setBackground(new java.awt.Color(51, 153, 255));
+        jButtonRefreshData1.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
+        jButtonRefreshData1.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonRefreshData1.setText("IMPORT CSV");
+        jButtonRefreshData1.setContentAreaFilled(false);
+        jButtonRefreshData1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonRefreshData1.setFocusPainted(false);
+        jButtonRefreshData1.setOpaque(true);
+        jButtonRefreshData1.setPreferredSize(new java.awt.Dimension(85, 24));
+        jButtonRefreshData1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonRefreshData1ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButtonRefreshData1);
+        jButtonRefreshData1.setBounds(750, 260, 110, 24);
+
+        jButtonRefreshData2.setBackground(new java.awt.Color(51, 153, 255));
+        jButtonRefreshData2.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
+        jButtonRefreshData2.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonRefreshData2.setText("EXPORT CSV");
+        jButtonRefreshData2.setContentAreaFilled(false);
+        jButtonRefreshData2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonRefreshData2.setFocusPainted(false);
+        jButtonRefreshData2.setOpaque(true);
+        jButtonRefreshData2.setPreferredSize(new java.awt.Dimension(85, 24));
+        jButtonRefreshData2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonRefreshData2ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jButtonRefreshData2);
+        jButtonRefreshData2.setBounds(630, 260, 110, 24);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -847,6 +1077,14 @@ public class TeacherManageStudent extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jLogoutButton1MousePressed
 
+    private void jButtonRefreshData1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRefreshData1ActionPerformed
+        importExcelData();
+    }//GEN-LAST:event_jButtonRefreshData1ActionPerformed
+
+    private void jButtonRefreshData2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRefreshData2ActionPerformed
+        exportTableDataToExcel();
+    }//GEN-LAST:event_jButtonRefreshData2ActionPerformed
+
     
     
     public static void main(String args[]) {
@@ -871,6 +1109,8 @@ public class TeacherManageStudent extends javax.swing.JFrame {
     private javax.swing.JPanel jArchiveStudents;
     private javax.swing.JPanel jAttendance;
     private javax.swing.JButton jButtonRefreshData;
+    private javax.swing.JButton jButtonRefreshData1;
+    private javax.swing.JButton jButtonRefreshData2;
     private javax.swing.JPanel jDashboard;
     private javax.swing.JLabel jError;
     private javax.swing.JLabel jLabel1;

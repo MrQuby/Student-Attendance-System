@@ -84,6 +84,16 @@ public class UpdateStudent extends javax.swing.JFrame {
         }
     }
     
+    //RFID validation
+    private boolean validateID(String idnumbertext) {
+        try {
+            Integer.parseInt(idnumbertext);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -94,7 +104,6 @@ public class UpdateStudent extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
         jButtonSave = new javax.swing.JButton();
-        jLabel8 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jAddress = new javax.swing.JTextArea();
@@ -106,9 +115,12 @@ public class UpdateStudent extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jStudentID = new javax.swing.JTextField();
         jFullName = new javax.swing.JTextField();
         jDepartment = new javax.swing.JComboBox<>();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jStudentRFID = new javax.swing.JTextField();
+        jStudentID = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("UPDATE STUDENT");
@@ -153,7 +165,7 @@ public class UpdateStudent extends javax.swing.JFrame {
             }
         });
         jPanel1.add(jButton2);
-        jButton2.setBounds(290, 360, 120, 25);
+        jButton2.setBounds(290, 400, 120, 25);
 
         jButtonSave.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
         jButtonSave.setText("SAVE");
@@ -164,13 +176,7 @@ public class UpdateStudent extends javax.swing.JFrame {
             }
         });
         jPanel1.add(jButtonSave);
-        jButtonSave.setBounds(140, 360, 120, 25);
-
-        jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel8.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel8.setText("BIRTHDATE");
-        jPanel1.add(jLabel8);
-        jLabel8.setBounds(20, 184, 100, 20);
+        jButtonSave.setBounds(140, 400, 120, 25);
 
         jPanel3.setBackground(new java.awt.Color(25, 118, 211));
         jPanel3.setLayout(null);
@@ -184,29 +190,29 @@ public class UpdateStudent extends javax.swing.JFrame {
         jScrollPane2.setViewportView(jAddress);
 
         jPanel3.add(jScrollPane2);
-        jScrollPane2.setBounds(140, 210, 270, 70);
+        jScrollPane2.setBounds(140, 250, 270, 70);
 
         jBirthdate.setDateFormatString("MM-dd-yy");
         jBirthdate.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jPanel3.add(jBirthdate);
-        jBirthdate.setBounds(140, 130, 270, 26);
+        jBirthdate.setBounds(140, 170, 270, 26);
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("ADDRESS");
         jPanel3.add(jLabel1);
-        jLabel1.setBounds(20, 210, 100, 20);
+        jLabel1.setBounds(20, 250, 100, 20);
 
         jLabel6.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(255, 255, 255));
         jLabel6.setText("STATUS");
         jPanel3.add(jLabel6);
-        jLabel6.setBounds(20, 169, 100, 30);
+        jLabel6.setBounds(20, 210, 60, 30);
 
         jStatus.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ACTIVE", "INACTIVE" }));
         jPanel3.add(jStatus);
-        jStatus.setBounds(140, 170, 270, 26);
+        jStatus.setBounds(140, 210, 270, 26);
 
         jDisplayImages.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 204, 255)));
         jPanel3.add(jDisplayImages);
@@ -216,35 +222,51 @@ public class UpdateStudent extends javax.swing.JFrame {
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("DEPARTMENT");
         jPanel3.add(jLabel3);
-        jLabel3.setBounds(20, 94, 110, 20);
+        jLabel3.setBounds(20, 130, 110, 20);
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel4.setText("STUDENT ID");
+        jLabel4.setText("STUDENT RFID");
         jPanel3.add(jLabel4);
-        jLabel4.setBounds(20, 14, 100, 20);
+        jLabel4.setBounds(20, 50, 100, 20);
 
         jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(255, 255, 255));
         jLabel5.setText("FULL NAME");
         jPanel3.add(jLabel5);
-        jLabel5.setBounds(20, 54, 100, 20);
+        jLabel5.setBounds(20, 90, 100, 20);
+
+        jFullName.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jPanel3.add(jFullName);
+        jFullName.setBounds(140, 90, 270, 26);
+
+        jDepartment.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jDepartment.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "BSIT", "BSBA", "BSCRIM", "BEED", "BSHM" }));
+        jPanel3.add(jDepartment);
+        jDepartment.setBounds(140, 130, 270, 26);
+
+        jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel8.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel8.setText("BIRTHDATE");
+        jPanel3.add(jLabel8);
+        jLabel8.setBounds(20, 170, 100, 20);
+
+        jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel9.setText("STUDENT ID");
+        jPanel3.add(jLabel9);
+        jLabel9.setBounds(20, 14, 100, 20);
+
+        jStudentRFID.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jPanel3.add(jStudentRFID);
+        jStudentRFID.setBounds(140, 50, 270, 26);
 
         jStudentID.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jPanel3.add(jStudentID);
         jStudentID.setBounds(140, 10, 270, 26);
 
-        jFullName.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jPanel3.add(jFullName);
-        jFullName.setBounds(140, 50, 270, 26);
-
-        jDepartment.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jDepartment.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "BSIT", "BSBA", "BSCRIM", "BEED", "BSHM" }));
-        jPanel3.add(jDepartment);
-        jDepartment.setBounds(140, 90, 270, 26);
-
         jPanel1.add(jPanel3);
-        jPanel3.setBounds(0, 50, 700, 290);
+        jPanel3.setBounds(0, 50, 700, 330);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -254,7 +276,9 @@ public class UpdateStudent extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 440, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         pack();
@@ -267,11 +291,14 @@ public class UpdateStudent extends javax.swing.JFrame {
 
     //save button
     private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveActionPerformed
-        if(jStudentID.getText().isEmpty() || jFullName.getText().isEmpty() || jAddress.getText().isEmpty() || jBirthdate.getDate() == null){
+        if(jStudentRFID.getText().isEmpty() || jFullName.getText().isEmpty() || jAddress.getText().isEmpty() || jBirthdate.getDate() == null){
             showErrorDialog("Please fill in all fields");
             return;
         }
-        
+        if(!validateID(jStudentRFID.getText())){
+            showErrorDialog("Invalid RFID");
+            return;
+        }
         File file = null;
         if (imagePath != null && !imagePath.isEmpty()) {
             file = new File(imagePath);
@@ -290,6 +317,7 @@ public class UpdateStudent extends javax.swing.JFrame {
             String query;
             if (file != null) {
                 query = "UPDATE student SET "
+                    + "student_rfid=?, "
                     + "student_fullname=?, "
                     + "student_birthdate=?, "
                     + "student_address=?, "
@@ -299,6 +327,7 @@ public class UpdateStudent extends javax.swing.JFrame {
                     + "WHERE student_id=?";
             } else {
                 query = "UPDATE student SET "
+                    + "student_rfid=?, "
                     + "student_fullname=?, "
                     + "student_birthdate=?, "
                     + "student_address=?, "
@@ -310,18 +339,19 @@ public class UpdateStudent extends javax.swing.JFrame {
             Connection connection = connector.connect;
             PreparedStatement pst = connection.prepareStatement(query);
 
-            pst.setString(1, jFullName.getText());
-            pst.setString(2, birthdate);
-            pst.setString(3, jAddress.getText());
-            pst.setString(4, (String)jDepartment.getSelectedItem());
+            pst.setString(1, jStudentRFID.getText());
+            pst.setString(2, jFullName.getText());
+            pst.setString(3, birthdate);
+            pst.setString(4, jAddress.getText());
+            pst.setString(5, (String)jDepartment.getSelectedItem());
 
             if (file != null) {
-                pst.setBinaryStream(5, inputImage);
-                pst.setString(6, (String)jStatus.getSelectedItem());
-                pst.setInt(7, Integer.valueOf(jStudentID.getText()));
+                pst.setBinaryStream(6, inputImage);
+                pst.setString(7, (String)jStatus.getSelectedItem());
+                pst.setInt(8, Integer.valueOf(jStudentID.getText()));
             } else {
-                pst.setString(5, (String) jStatus.getSelectedItem());
-                pst.setInt(6, Integer.valueOf(jStudentID.getText()));
+                pst.setString(6, (String) jStatus.getSelectedItem());
+                pst.setInt(7, Integer.valueOf(jStudentID.getText()));
             }
 
             if (connector.insertDatas(pst)) {
@@ -418,10 +448,12 @@ public class UpdateStudent extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     public javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane2;
     public javax.swing.JComboBox<String> jStatus;
     public javax.swing.JTextField jStudentID;
+    public javax.swing.JTextField jStudentRFID;
     // End of variables declaration//GEN-END:variables
 }

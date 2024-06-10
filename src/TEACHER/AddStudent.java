@@ -66,12 +66,16 @@ public class AddStudent extends javax.swing.JFrame {
     
     //adding new student and save to database
     public void addStudent(){
-        if(jStudentID.getText().isEmpty() || jFullName.getText().isEmpty() || jAddress.getText().isEmpty() || jBirthdate.getDate() == null){
+        if(jStudentID.getText().isEmpty() || jStudentRFID.getText().isEmpty() || jFullName.getText().isEmpty() || jAddress.getText().isEmpty() || jBirthdate.getDate() == null){
             showErrorDialog("Please fill in all fields");
             return;
         }
         if(!validateID(jStudentID.getText())){
             showErrorDialog("Invalid ID");
+            return;
+        }
+        if(!validateID(jStudentRFID.getText())){
+            showErrorDialog("Invalid RFID");
             return;
         }
         File file = new File(imagePath);
@@ -81,19 +85,20 @@ public class AddStudent extends javax.swing.JFrame {
         myConnection connector = new myConnection();
         try {
             InputStream inputImage = new FileInputStream(new File(imagePath));
-            String query = "INSERT INTO student (student_id, student_fullname, student_birthdate, student_department, student_address, student_image, student_status, student_archive) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            String query = "INSERT INTO student (student_id, student_rfid, student_fullname, student_birthdate, student_department, student_address, student_image, student_status, student_archive) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             
             Connection connection = connector.connect;
             PreparedStatement pst = connection.prepareStatement(query);
 
             pst.setInt(1, Integer.valueOf(jStudentID.getText()));
-            pst.setString(2, jFullName.getText());
-            pst.setString(3, birthdate);
-            pst.setString(4, (String)jDepartment.getSelectedItem());
-            pst.setString(5, jAddress.getText());
-            pst.setBinaryStream(6, inputImage);
-            pst.setString(7, (String)jStatus.getSelectedItem());
-            pst.setString(8, "NO");
+            pst.setInt(2, Integer.valueOf(jStudentRFID.getText()));
+            pst.setString(3, jFullName.getText());
+            pst.setString(4, birthdate);
+            pst.setString(5, (String)jDepartment.getSelectedItem());
+            pst.setString(6, jAddress.getText());
+            pst.setBinaryStream(7, inputImage);
+            pst.setString(8, (String)jStatus.getSelectedItem());
+            pst.setString(9, "NO");
             if(connector.insertDatas(pst)){
                 showSuccessDialog("Register successfully");
                 //history logs
@@ -119,15 +124,6 @@ public class AddStudent extends javax.swing.JFrame {
         }
     }
     
-    //function to clear all textfields
-    private void clearFields() {
-        jStudentID.setText("");
-        jFullName.setText("");
-        jAddress.setText("");
-        jBirthdate.setDate(null);
-        jImage.setIcon(null);
-    }
-    
     //function on error meessage dialog
     private void showErrorDialog(String message) {
         UIManager.put("Button.Focus",new ColorUIResource(new Color(0,0,0,0)));
@@ -147,8 +143,6 @@ public class AddStudent extends javax.swing.JFrame {
         jInsertImage = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         jImage = new javax.swing.JLabel();
-        jButtonCancel = new javax.swing.JButton();
-        jButtonSave = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jAddress = new javax.swing.JTextArea();
@@ -164,6 +158,10 @@ public class AddStudent extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
+        jButtonSave = new javax.swing.JButton();
+        jButtonCancel = new javax.swing.JButton();
+        jStudentRFID = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("ADD STUDENT");
@@ -197,30 +195,6 @@ public class AddStudent extends javax.swing.JFrame {
         jPanel1.add(jImage);
         jImage.setBounds(440, 60, 230, 200);
 
-        jButtonCancel.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonCancel.setForeground(new java.awt.Color(255, 51, 51));
-        jButtonCancel.setText("CANCEL");
-        jButtonCancel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonCancelActionPerformed(evt);
-            }
-        });
-        jPanel1.add(jButtonCancel);
-        jButtonCancel.setBounds(290, 360, 120, 25);
-
-        jButtonSave.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonSave.setForeground(new java.awt.Color(0, 102, 255));
-        jButtonSave.setText("SAVE");
-        jButtonSave.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonSave.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonSaveActionPerformed(evt);
-            }
-        });
-        jPanel1.add(jButtonSave);
-        jButtonSave.setBounds(140, 360, 120, 25);
-
         jPanel3.setBackground(new java.awt.Color(25, 118, 211));
         jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 102, 255)));
         jPanel3.setLayout(null);
@@ -234,29 +208,29 @@ public class AddStudent extends javax.swing.JFrame {
         jScrollPane2.setViewportView(jAddress);
 
         jPanel3.add(jScrollPane2);
-        jScrollPane2.setBounds(140, 260, 270, 70);
+        jScrollPane2.setBounds(140, 300, 270, 70);
 
         jBirthdate.setDateFormatString("MMMM dd, yyyy");
         jBirthdate.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jPanel3.add(jBirthdate);
-        jBirthdate.setBounds(140, 180, 270, 26);
+        jBirthdate.setBounds(140, 220, 270, 26);
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("ADDRESS");
         jPanel3.add(jLabel1);
-        jLabel1.setBounds(20, 260, 100, 20);
+        jLabel1.setBounds(20, 300, 100, 20);
 
         jStatus.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ACTIVE", "INACTIVE" }));
         jPanel3.add(jStatus);
-        jStatus.setBounds(140, 220, 270, 26);
+        jStatus.setBounds(140, 260, 270, 26);
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel4.setText("STUDENT ID");
+        jLabel4.setText("STUDENT RFID");
         jPanel3.add(jLabel4);
-        jLabel4.setBounds(20, 60, 100, 30);
+        jLabel4.setBounds(20, 97, 100, 30);
 
         jStudentID.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jPanel3.add(jStudentID);
@@ -267,28 +241,28 @@ public class AddStudent extends javax.swing.JFrame {
         jLabel5.setForeground(new java.awt.Color(255, 255, 255));
         jLabel5.setText("FULL NAME");
         jPanel3.add(jLabel5);
-        jLabel5.setBounds(20, 100, 100, 20);
+        jLabel5.setBounds(20, 140, 100, 20);
 
         jFullName.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jPanel3.add(jFullName);
-        jFullName.setBounds(140, 100, 270, 26);
+        jFullName.setBounds(140, 140, 270, 26);
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("DEPARTMENT");
         jPanel3.add(jLabel3);
-        jLabel3.setBounds(20, 140, 110, 30);
+        jLabel3.setBounds(20, 180, 110, 30);
 
         jDepartment.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jDepartment.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "BSIT", "BSBA", "BSCRIM", "BEED", "BSHM" }));
         jPanel3.add(jDepartment);
-        jDepartment.setBounds(140, 140, 270, 26);
+        jDepartment.setBounds(140, 180, 270, 26);
 
         jLabel6.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel6.setForeground(new java.awt.Color(255, 255, 255));
         jLabel6.setText("STATUS");
         jPanel3.add(jLabel6);
-        jLabel6.setBounds(20, 220, 100, 20);
+        jLabel6.setBounds(20, 260, 100, 20);
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
@@ -300,10 +274,44 @@ public class AddStudent extends javax.swing.JFrame {
         jLabel8.setForeground(new java.awt.Color(255, 255, 255));
         jLabel8.setText("BIRTHDATE");
         jPanel3.add(jLabel8);
-        jLabel8.setBounds(20, 180, 100, 20);
+        jLabel8.setBounds(20, 220, 100, 20);
+
+        jButtonSave.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonSave.setForeground(new java.awt.Color(0, 102, 255));
+        jButtonSave.setText("SAVE");
+        jButtonSave.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonSaveActionPerformed(evt);
+            }
+        });
+        jPanel3.add(jButtonSave);
+        jButtonSave.setBounds(140, 400, 120, 25);
+
+        jButtonCancel.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonCancel.setForeground(new java.awt.Color(255, 51, 51));
+        jButtonCancel.setText("CANCEL");
+        jButtonCancel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonCancelActionPerformed(evt);
+            }
+        });
+        jPanel3.add(jButtonCancel);
+        jButtonCancel.setBounds(290, 400, 120, 25);
+
+        jStudentRFID.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jPanel3.add(jStudentRFID);
+        jStudentRFID.setBounds(140, 100, 270, 26);
+
+        jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel9.setText("STUDENT ID");
+        jPanel3.add(jLabel9);
+        jLabel9.setBounds(20, 60, 100, 30);
 
         jPanel1.add(jPanel3);
-        jPanel3.setBounds(0, 0, 700, 400);
+        jPanel3.setBounds(0, 0, 700, 440);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -313,7 +321,7 @@ public class AddStudent extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 440, Short.MAX_VALUE)
         );
 
         pack();
@@ -391,10 +399,12 @@ public class AddStudent extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JComboBox<String> jStatus;
     private javax.swing.JTextField jStudentID;
+    private javax.swing.JTextField jStudentRFID;
     // End of variables declaration//GEN-END:variables
 }

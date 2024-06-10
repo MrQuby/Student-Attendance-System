@@ -243,10 +243,10 @@ public class StudentAttendance extends javax.swing.JFrame {
     }
     
     //get fullname of student
-    public String getName(int id){
+    public String getName(int student_rfid){
         myConnection connector = new myConnection();
         try{
-            String query = "SELECT student_fullname FROM student WHERE student_id = '" + id + "'";
+            String query = "SELECT student_fullname FROM student WHERE student_rfid = '" + student_rfid + "'";
             ResultSet resultset = connector.getData(query);
             if(resultset.next()){
                 return resultset.getString("student_fullname");
@@ -260,10 +260,10 @@ public class StudentAttendance extends javax.swing.JFrame {
     }
     
     //get department of student
-    public String getDepartment(int id){
+    public String getDepartment(int student_rfid){
         myConnection connector = new myConnection();
         try{
-            String query = "SELECT student_department FROM student WHERE student_id = '" + id + "'";
+            String query = "SELECT student_department FROM student WHERE student_rfid = '" + student_rfid + "'";
             ResultSet resultset = connector.getData(query);
             if(resultset.next()){
                 return resultset.getString("student_department");
@@ -277,10 +277,10 @@ public class StudentAttendance extends javax.swing.JFrame {
     }
     
     //check if rfid exist and ACTIVE
-    private boolean isIDRegister(int id){
+    private boolean isIDRegister(int student_rfid){
         myConnection connector = new myConnection();
         try{
-            String query = "SELECT * FROM student WHERE student_id = '" + id + "' AND student_status = 'ACTIVE'";
+            String query = "SELECT * FROM student WHERE student_rfid = '" + student_rfid + "' AND student_status = 'ACTIVE'";
             ResultSet resultset = connector.getData(query);
             if(resultset.next()){
                 return true;
@@ -295,10 +295,10 @@ public class StudentAttendance extends javax.swing.JFrame {
     
 
     //get image of the student
-    public ImageIcon getStudentImage(int id){
+    public ImageIcon getStudentImage(int student_rfid){
         myConnection connector = new myConnection();
         try {
-            String query = "SELECT student_image FROM student WHERE student_id = '" + id + "'";
+            String query = "SELECT student_image FROM student WHERE student_rfid = '" + student_rfid + "'";
             ResultSet resultSet = connector.getData(query);
             if (resultSet.next()) {
                 byte[] imageData = resultSet.getBytes("student_image");
@@ -314,10 +314,10 @@ public class StudentAttendance extends javax.swing.JFrame {
     }
     
     //display image from database
-    public void showImage(int id) {
+    public void showImage(int student_rfid) {
         myConnection connector = new myConnection();
         try {
-            String query = "SELECT student_image FROM student WHERE student_id = '" + id + "'";
+            String query = "SELECT student_image FROM student WHERE student_rfid = '" + student_rfid + "'";
             ResultSet resultSet = connector.getData(query);
             if (resultSet.next()) {
                 byte[] imageData = resultSet.getBytes("student_image");
@@ -327,15 +327,33 @@ public class StudentAttendance extends javax.swing.JFrame {
                 ImageIcon scaledImageIcon = new ImageIcon(scaledImage);
                 jImage1.setIcon(scaledImageIcon);
             } else {
-                System.out.println("No image found for student ID: " + id);
+                System.out.println("No image found for student ID: " + student_rfid);
             }
         } catch (SQLException ex) {
             System.out.println("Error: " + ex.getMessage());
         }
     }
     
+    //get student ID
+    public int getStudentID(int student_rfid){
+        myConnection connector = new myConnection();
+        try{
+            String query = "SELECT student_id FROM student WHERE student_rfid = '" + student_rfid + "'";
+            ResultSet resultset = connector.getData(query);
+            if(resultset.next()){
+                return resultset.getInt("student_id");
+            }else{
+                return 0;
+            }
+        }catch(SQLException ex){
+            System.out.println("" + ex.getMessage());
+            return 0;
+        }
+    }
+    
     // Method to handle attendance logging
-    private void handleAttendance(int id) {
+    private void handleAttendance(int student_rfid) {
+        int id = getStudentID(student_rfid);
         LocalDateTime now = LocalDateTime.now();
         myConnection connector = new myConnection();
         Connection connect = connector.connect;
@@ -390,8 +408,8 @@ public class StudentAttendance extends javax.swing.JFrame {
     }
     
     //check if the student has already checked in within the last minute
-    private boolean hasCheckedInWithinLastMinute(int studentId) {
-        LocalDateTime lastCheckInTime = studentCheckInTimes.get(studentId);
+    private boolean hasCheckedInWithinLastMinute(int student_rfid) {
+        LocalDateTime lastCheckInTime = studentCheckInTimes.get(student_rfid);
         if (lastCheckInTime != null) {
             LocalDateTime now = LocalDateTime.now();
             long timeDifferenceInSeconds = Duration.between(lastCheckInTime, now).getSeconds();
@@ -401,11 +419,12 @@ public class StudentAttendance extends javax.swing.JFrame {
     }
 
     //check if the student has already checked out today
-    private boolean hasCheckedOutToday(int studentId) {
+    private boolean hasCheckedOutToday(int student_rfid) {
+        int id = getStudentID(student_rfid);
         myConnection connector = new myConnection();
         String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         try {
-            String query = "SELECT * FROM attendance_table WHERE student_id = '" + studentId + "' AND date = '" + currentDate + "' AND time_out IS NOT NULL";
+            String query = "SELECT * FROM attendance_table WHERE student_id = '" + id + "' AND date = '" + currentDate + "' AND time_out IS NOT NULL";
             ResultSet resultSet = connector.getData(query);
             return resultSet.next();
         } catch (SQLException ex) {
@@ -424,26 +443,25 @@ public class StudentAttendance extends javax.swing.JFrame {
             String tagId = tagIdBuilder.toString().trim();
             tagIdBuilder.setLength(0);
 
-            int studentId = 0;
+            int student_rfid = 0;
             try {
-                studentId = Integer.parseInt(tagId);
+                student_rfid = Integer.parseInt(tagId);
             } catch (NumberFormatException e) {
                 System.out.println("Invalid RFID tag ID format.");
                 return;
             }
             // Get student details
-            String name = getName(studentId);
-            String department = getDepartment(studentId);
-            ImageIcon image = getStudentImage(studentId);
+            String name = getName(student_rfid);
+            String department = getDepartment(student_rfid);
+            ImageIcon image = getStudentImage(student_rfid);
             
             if (name != null) {
                 name = name.toUpperCase();
             }
             
             // Check if the student has already checked in within the last minute
-            if (hasCheckedInWithinLastMinute(studentId)) {
-                //JOptionPane.showMessageDialog(null,"You cannot check out yet. Please wait for one minute after checking in","Check-out Error",JOptionPane.ERROR_MESSAGE);
-                showImage(Integer.valueOf(tagId));
+            if (hasCheckedInWithinLastMinute(student_rfid)) {
+                showImage(student_rfid);
                 Font font = new Font("Segoe UI", Font.BOLD, 39);
                 jStatus1.setFont(font);
                 jStatus1.setText("WAIT ONE MINUTE BEFORE CHECKING OUT");
@@ -454,10 +472,8 @@ public class StudentAttendance extends javax.swing.JFrame {
             }
         
             // Check if the student has already checked out today
-            if (hasCheckedOutToday(studentId)) {
-                //JOptionPane.showMessageDialog(null,"You have already checked out today","Check-out Error",JOptionPane.ERROR_MESSAGE);
-                // Update status label to indicate student checked out
-                showImage(Integer.valueOf(tagId));
+            if (hasCheckedOutToday(student_rfid)) {
+                showImage(student_rfid);
                 jStatus1.setText("ALREADY CHECKED OUT");
                 jStatus1.setForeground(Color.RED);
                 jDepartment1.setText(department);
@@ -467,8 +483,8 @@ public class StudentAttendance extends javax.swing.JFrame {
             
             
             if(isIDRegister(Integer.valueOf(tagId))){
-                handleAttendance(studentId);
-                showImage(Integer.valueOf(tagId));
+                handleAttendance(student_rfid);
+                showImage(student_rfid);
                 jDepartment1.setText(department);
                 jStudentName1.setText(name);
                 rotateStudentData(name, department, image, jStatus1.getText());  // Rotate student data               

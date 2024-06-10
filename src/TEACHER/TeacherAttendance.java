@@ -53,7 +53,7 @@ public class TeacherAttendance extends javax.swing.JFrame {
         ourDateTime();
         ImageIcon  image2 = new ImageIcon(new ImageIcon("src/icon/IT_logo.png").getImage().getScaledInstance(ITLogo.getWidth(), ITLogo.getHeight(), Image.SCALE_SMOOTH));
         ITLogo.setIcon(image2);
-        ImageIcon  image3 = new ImageIcon(new ImageIcon("src/icon/logo.png").getImage().getScaledInstance(SCCLogo.getWidth(), SCCLogo.getHeight(), Image.SCALE_SMOOTH));
+        ImageIcon  image3 = new ImageIcon(new ImageIcon("src/icon/scc logo.png").getImage().getScaledInstance(SCCLogo.getWidth(), SCCLogo.getHeight(), Image.SCALE_SMOOTH));
         SCCLogo.setIcon(image3);
         displayDataTable();
         
@@ -603,7 +603,7 @@ public class TeacherAttendance extends javax.swing.JFrame {
         jPanel1.add(SCCLogo);
         SCCLogo.setBounds(250, 10, 90, 70);
         jPanel1.add(ITLogo);
-        ITLogo.setBounds(1000, 10, 70, 70);
+        ITLogo.setBounds(980, 10, 70, 70);
 
         jSearchID.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
         jSearchID.addMouseListener(new java.awt.event.MouseAdapter() {

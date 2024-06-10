@@ -97,18 +97,19 @@ public class TeacherArchiveStudent extends javax.swing.JFrame {
         //change the column header name
         TableColumnModel columnModel = jstudent_Table.getColumnModel();
         columnModel.getColumn(0).setHeaderValue("Student ID");
-        columnModel.getColumn(1).setHeaderValue("Full Name");
-        columnModel.getColumn(2).setHeaderValue("Birthdate");
-        columnModel.getColumn(3).setHeaderValue("Department");
-        columnModel.getColumn(4).setHeaderValue("Address");
-        columnModel.getColumn(5).setHeaderValue("Status");
+        columnModel.getColumn(1).setHeaderValue("Student RFID");
+        columnModel.getColumn(2).setHeaderValue("Full Name");
+        columnModel.getColumn(3).setHeaderValue("Birthdate");
+        columnModel.getColumn(4).setHeaderValue("Department");
+        columnModel.getColumn(5).setHeaderValue("Address");
+        columnModel.getColumn(6).setHeaderValue("Status");
 
         //size of the row height
         jstudent_Table.setRowHeight(20);
         
         //size of column by percent
         int totalWidth = jstudent_Table.getWidth();
-        double[] columnWidthPercentages = {12, 20, 12, 12, 24, 12};
+        double[] columnWidthPercentages = {10, 10, 20, 10, 10, 24, 8};
         int[] columnWidths = new int[columnWidthPercentages.length];
 
         for (int i = 0; i < columnWidthPercentages.length; i++) {
@@ -121,6 +122,7 @@ public class TeacherArchiveStudent extends javax.swing.JFrame {
         columnModel.getColumn(3).setPreferredWidth(columnWidths[3]);
         columnModel.getColumn(4).setPreferredWidth(columnWidths[4]);
         columnModel.getColumn(5).setPreferredWidth(columnWidths[5]);
+        columnModel.getColumn(6).setPreferredWidth(columnWidths[6]);
         
         // Set font properties for the header
         Font headerFont = new Font("Segoe UI", Font.PLAIN, 14);
@@ -142,7 +144,7 @@ public class TeacherArchiveStudent extends javax.swing.JFrame {
     public void displayDataTable(){
         try{
             myConnection dbc = new myConnection();
-            ResultSet rs = dbc.getData("SELECT student_id,student_fullname,student_birthdate,student_department,student_address,student_status FROM student WHERE student_archive = 'YES'");
+            ResultSet rs = dbc.getData("SELECT student_id, student_rfid, student_fullname, student_birthdate, student_department, student_address, student_status FROM student WHERE student_archive = 'YES'");
             jstudent_Table.setModel(DbUtils.resultSetToTableModel(rs));
             
             //clear the searchfield if click to table
@@ -201,7 +203,7 @@ public class TeacherArchiveStudent extends javax.swing.JFrame {
                 jError.setText("");
                 myConnection dbc = new myConnection();
                 int studentID = Integer.parseInt(searchText);
-                String query = "SELECT student_id, student_fullname, student_birthdate, student_department, student_address, student_status FROM student WHERE student_archive = 'YES' AND student_id = " + studentID;
+                String query = "SELECT student_id, student_rfid, student_fullname, student_birthdate, student_department, student_address, student_status FROM student WHERE student_archive = 'YES' AND student_id = " + studentID;
                 ResultSet rs = dbc.getData(query);
                 jstudent_Table.setModel(DbUtils.resultSetToTableModel(rs));
                 tableSettings();
